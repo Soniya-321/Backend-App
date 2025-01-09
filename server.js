@@ -7,7 +7,7 @@ const app = express();
 
 // Allow requests from your frontend
 const corsOptions = {
-  origin: 'http://localhost:3000', // Replace with your frontend's URL
+  origin: 'https://frontend-project-7ksn.onrender.com', // Replace with your frontend's URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
   credentials: true, // Include credentials like cookies, if needed
 };
