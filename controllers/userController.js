@@ -60,6 +60,33 @@ exports.loginUser = async (req, res) => {
   });
 };
 
+// Verify user and get details
+exports.verifyUser = (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; // Extract token from header
+
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized: No token provided' });
+  }
+
+  jwt.verify(token, 'your_jwt_secret', (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+    }
+
+    // Fetch user details using the decoded token's user ID
+    User.getById(decoded.id, (err, user) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!user) return res.status(404).json({ message: 'User not found' });
+
+      // Send user details back to frontend
+      res.status(200).json({
+        firstName: user.first_name,
+        lastName: user.last_name,
+      });
+    });
+  });
+};
+
 // Get all users
 exports.getAllUsers = (req, res) => {
   User.getAll((err, results) => {
