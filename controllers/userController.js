@@ -34,8 +34,8 @@ exports.getUserById = (req, res) => {
   const { id } = req.params;
   User.getById(id, (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (results.length === 0) return res.status(404).json({ message: 'User not found' });
-    res.status(200).json(results[0]);
+    if (results === undefined) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json(results);
   });
 };
 
