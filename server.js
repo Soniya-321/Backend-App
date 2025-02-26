@@ -1,27 +1,45 @@
-const cors = require('cors');
-const express = require('express');
-const bodyParser = require('body-parser');
-const userRoutes = require('./routes/userRoutes');
+require("dotenv").config();
+const express = require("express");
+const http = require("http"); // Required for WebSocket server
+const { Server } = require("socket.io"); // Import Socket.io
+const cors = require("cors");
+const connectDB = require("./config/db");
+const doctorRoutes = require("./routes/doctorRoutes");
+const appointmentRoutes = require("./routes/appointmentRoutes");
+const { errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
+const server = http.createServer(app); // Create HTTP server
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  },
+}); // Initialize WebSocket server
 
-// Allow requests from your frontend
-const corsOptions = {
-  origin: 'https://frontend-project-7ksn.onrender.com', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
-  credentials: true, // Include credentials like cookies, if needed
-};
 
 
-// Middleware
-app.use(bodyParser.json());
-app.use(cors(corsOptions));
+connectDB();
 
-// Routes
-app.use('/api', userRoutes);
+app.use(cors());
+app.use(express.json());
 
-// Server
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+app.use("/doctors", doctorRoutes);
+app.use("/appointments", appointmentRoutes);
+
+app.use(errorHandler);
+
+// WebSocket connection event
+io.on("connection", (socket) => {
+    console.log("🔗 New WebSocket connection");
+  
+    socket.on("disconnect", () => {
+      console.log("❌ Client disconnected");
+    });
+  });
+  
+  // Make io accessible globally for real-time updates
+  app.set("io", io);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, "0.0.0.0" , () => console.log(`🚀 Server running on port ${PORT}`)); 
